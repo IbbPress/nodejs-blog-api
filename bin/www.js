@@ -5,5 +5,5 @@ const serverHandle = require('../app')
 
 const server = http.createServer(serverHandle)
 server.listen(PORT, () => {
-  console.log('server listenning at localhost:8000')
+  console.log(`server listenning at http://localhost:${PORT}`)
 })
