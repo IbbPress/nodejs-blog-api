@@ -1,57 +1,63 @@
+const { exec } = require('../db/mysql')
+
 const getList = (author, keywords) => {
-  return [
-    {
-      id: 1,
-      author: 'zwc',
-      title:  'title1',
-      content: 'neirong',
-      createTime: 1581994675635
-    },
-    {
-      id: 2,
-      author: 'zwc',
-      title:  'title2',
-      content: 'content2',
-      createTime: 1581994707451
-    },
-    {
-      id: 3,
-      author: 'zwc',
-      title:  'title3',
-      content: 'content3',
-      createTime: 1581994701544
-    },
-  ]
+  let sql = `select * from article where 1=1 `
+  
+  if (author) {
+    sql += `and author='${author} `
+  }
+  
+  if (keywords) {
+    sql += `and title like '%${keywords}%' `
+  }
+
+  sql += `order by create_time desc;`
+
+  // 返回 promise
+  return exec(sql)
 }
 
 const getDetail = (id) => {
-  return {
-    id: 1,
-    author: 'zwc',
-    title:  'title1',
-    content: 'neirong',
-    createTime: 1581994675635
-  }
+  let sql = `select * from article where id='${id}';`
+  return exec(sql).then(rows => {
+    return rows[0]
+  })
 }
 
 const newBlog = (blogData = {}) => {
-  return {
-    id: 3,
-    title: 'new blog title',
-    content: 'new blog content'
-  }
+  const { title, content, author } = blogData
+  // Date.now 精确到毫秒，目前数据库精确到秒
+  const create_time = Math.ceil(Date.now() / 1000)
+  let sql = `
+    insert into article (title, content, create_time)
+    values ('${title}', '${content}', ${create_time});
+  `
+  
+  return exec(sql).then(insertData => {
+    return {
+      id: insertData.insertId
+    }
+  })
 }
 
 const updateBlog = (id, blogData = {}) => {
-  return {
-    id: 3,
-    title: 'new blog title',
-    content: 'new blog content'
-  }
+  const { title, content } = blogData
+  let sql = `
+    update article set title='${title}', content='${content}' where id='${id}';
+  `
+  
+  return exec(sql).then(data => data.affectedRows > 0)
 }
+
+const delBlog = (id, author) => {
+  const sql = `delete from article where id='${id}';`
+  return exec(sql).then(data => data.affectedRows > 0)
+}
+
 module.exports = {
   getList,
   getDetail,
   newBlog,
   updateBlog,
+  delBlog,
 }

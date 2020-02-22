@@ -1,4 +1,4 @@
-const { getList, getDetail, newBlog, updateBlog} = require('../controller/blog')
+const { getList, getDetail, newBlog, updateBlog, delBlog } = require('../controller/blog')
 const { SuccessModel, ErrorModel } = require('../model/resModel')
 
 const handleBlogRouter = (req, res) => {
@@ -7,25 +7,58 @@ const handleBlogRouter = (req, res) => {
   // 获取博客列表
   if(method === 'GET' && res.path === '/api/blog/list') {
     const { author, keywords } = req.query
-    const listData = getList(author, keywords);
-    return new SuccessModel(listData)
+    const result = getList(author, keywords);
+    // 返回值是 promise
+    return result.then(data => {
+      return new SuccessModel(data)
+    })
+    .catch(err => {
+    })
   }
   // 获取博客详情
   if(method === 'GET' && res.path === '/api/blog/detail') {
     const { id } = req.query
-    const data = getDetail(id);
-    return new SuccessModel(data)
+    const result = getDetail(id);
+    // 返回值是 promise
+    return result.then(data => {
+      return new SuccessModel(data)
+    })
+    .catch(err => {
+    })
   }
   // 新建博客
   if(method === 'POST' && res.path === '/api/blog/new') {
-    const data = newBlog(req.body)
-    return new SuccessModel(data)
+    req.body.author = 'zhangsan'
+    const result = newBlog(req.body)
+    // 返回值是 promise
+    return result.then(data => {
+      return new SuccessModel(data)
+    })
+    .catch(err => {
+    })
   }
   // 更新博客
   if(method === 'POST' && res.path === '/api/blog/update') {
     const { id } = req.query
-    const data = updateBlog(id, req.body)
-    return new SuccessModel(data)
+    const result = updateBlog(id, req.body)
+    // 返回值是 promise
+    return result.then(data => {
+      return new SuccessModel(data)
+    })
+    .catch(err => {
+    })
+  }
+  // 删除博客
+  if(method === 'POST' && res.path === '/api/blog/del') {
+    const { id } = req.query
+    const author = 'zhangsan'
+    const result = delBlog(id, author)
+    // 返回值是 promise
+    return result.then(data => {
+      return new SuccessModel(data)
+    })
+    .catch(err => {
+    })
   }
 }
 
