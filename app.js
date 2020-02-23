@@ -1,6 +1,16 @@
 const querystring = require('querystring')
 const handleUserRouter = require('./src/router/user')
 const handleBlogRouter = require('./src/router/blog')
+
+const SESSION_DATA = {}
+
+// 获取 cookie 的过期时间
+const getCookieExpires = () => {
+  const d = new Date()
+  d.setTime(d.getTime() + (24 * 60 * 60 * 1000))
+  return d.toGMTString()
+}
+
 // 用于解析 postData
 const getPostData = (req) => {
   const promise = new Promise((resolve, reject) => {
@@ -40,6 +50,32 @@ const serverHandle = (req, res) => {
   // 解析 query
   req.query = querystring.parse(url.split('?')[1])
 
+  // 解析 cookie
+  const cookieStr = req.headers.cookie || ''
+  req.cookie = {}
+  cookieStr.split(';').forEach(kv => {
+    if (kv) {
+      let arr = kv.split('=')
+      let key = arr[0].trim()
+      let value = arr[1].trim()
+      req.cookie[key] = value
+    }
+  })
+
+  // 解析 session
+  let needSetCookie = false
+  let userId = req.cookie.userid
+  if (userId) {
+    if (!SESSION_DATA[userId]) {
+      SESSION_DATA[userId] = {}
+    }
+  } else {
+    needSetCookie = true
+    userId = `${Date.now()}_${Math.random()}`
+    SESSION_DATA[userId] = {}
+  }
+  req.session = SESSION_DATA[userId]
+
   // 解析 postData
   getPostData(req).then(postData => {
     req.body = postData
@@ -49,6 +85,9 @@ const serverHandle = (req, res) => {
     const blogData = handleBlogRouter(req, res)
     if (blogData) {
       blogData.then(data => {
+        if (needSetCookie) {
+          res.setHeader('Set-Cookie', `userid=${userId}; path=/; httpOnly; expires=${getCookieExpires()}`)
+        }
         res.end(JSON.stringify(data))
       })
       return
@@ -58,6 +97,9 @@ const serverHandle = (req, res) => {
     const userData = handleUserRouter(req, res)
     if (userData) {
       userData.then(data => {
+        if (needSetCookie) {
+          res.setHeader('Set-Cookie', `userid=${userId}; path=/; httpOnly; expires=${getCookieExpires()}`)
+        }
         res.end(JSON.stringify(data))
       })
       return
