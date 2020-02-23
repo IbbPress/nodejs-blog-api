@@ -1,18 +1,18 @@
 {
-  "name": "blog-api-nodejs",
+  "name": "nodejs-blog-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "原生 Node.js 开发博客 Server 端",
   "main": "app.js",
   "bin": {
-    "blog-api-nodejs": "www.js"
+    "nodejs-blog-server": "www.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "cross-env NODE_ENV=dev nodemon ./bin/www.js",
     "prd": "cross-env NODE_ENV=production nodemon ./bin/www.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [ "nodejs", "blog-server" ],
+  "author": "wencaizhang <1052642137@qq.com>",
   "license": "ISC",
   "devDependencies": {
     "cross-env": "^7.0.0",
